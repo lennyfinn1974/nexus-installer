@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Nexus Agent — Always-On Daemon -->
+    <key>Label</key>
+    <string>com.nexus.agent</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>__NEXUS_HOME__/venv/bin/python</string>
+        <string>-m</string>
+        <string>uvicorn</string>
+        <string>main:app</string>
+        <string>--host</string>
+        <string>0.0.0.0</string>
+        <string>--port</string>
+        <string>8080</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>__NEXUS_HOME__/backend</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>__NEXUS_HOME__/venv/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>VIRTUAL_ENV</key>
+        <string>__NEXUS_HOME__/venv</string>
+        <key>PYTHONPATH</key>
+        <string>__NEXUS_HOME__/backend</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+    </dict>
+    <key>ThrottleInterval</key>
+    <integer>5</integer>
+
+    <key>StandardOutPath</key>
+    <string>__NEXUS_HOME__/backend/logs/launchd-stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>__NEXUS_HOME__/backend/logs/launchd-stderr.log</string>
+
+    <key>SoftResourceLimits</key>
+    <dict>
+        <key>NumberOfFiles</key>
+        <integer>4096</integer>
+    </dict>
+    <key>HardResourceLimits</key>
+    <dict>
+        <key>NumberOfFiles</key>
+        <integer>8192</integer>
+    </dict>
+
+    <key>Nice</key>
+    <integer>0</integer>
+</dict>
+</plist>
