@@ -376,7 +376,7 @@ PORT=8080
 ALLOWED_ORIGINS=http://localhost:8080,http://127.0.0.1:8080
 
 # Database
-DATABASE_URL=postgresql+asyncpg://${pg_user}@localhost/nexus
+DATABASE_URL=postgresql+asyncpg://${pg_user}@localhost/nexus?ssl=disable
 
 # Redis
 REDIS_URL=redis://localhost:6379
