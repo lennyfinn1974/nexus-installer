@@ -107,19 +107,28 @@ install_system_deps() {
         fi
     done
 
+    # CRITICAL: postgresql@17 is keg-only — its binaries (pg_isready, psql,
+    # createdb, pg_ctl, initdb) are NOT on PATH by default.
+    # We must add the bin directory to PATH for all subsequent commands.
+    local pg_prefix
+    pg_prefix="$(brew --prefix postgresql@17 2>/dev/null)"
+    if [[ -d "${pg_prefix}/bin" ]]; then
+        export PATH="${pg_prefix}/bin:$PATH"
+        log "PostgreSQL binaries added to PATH: ${pg_prefix}/bin"
+    fi
+
     # Start services
     info "Starting PostgreSQL..."
 
     # On a fresh install, PostgreSQL needs initdb before it can start.
     # Homebrew's postgresql@17 formula normally runs this automatically,
     # but if the data directory doesn't exist we need to do it manually.
-    local pg_prefix
-    pg_prefix="$(brew --prefix postgresql@17 2>/dev/null)"
-    local pg_data="${HOMEBREW_PREFIX:-/opt/homebrew}/var/postgresql@17"
+    local pg_data
+    pg_data="$(brew --prefix)/var/postgresql@17"
 
     if [[ ! -d "$pg_data" ]] || [[ -z "$(ls -A "$pg_data" 2>/dev/null)" ]]; then
         info "Initializing PostgreSQL data directory..."
-        "${pg_prefix}/bin/initdb" -D "$pg_data" --username="$(whoami)" --auth=trust \
+        initdb -D "$pg_data" --locale=en_US.UTF-8 -E UTF-8 --username="$(whoami)" --auth=trust \
             2>&1 | tee -a "$LOG_FILE" || warn "initdb may have already run"
     fi
 
@@ -249,6 +258,16 @@ build_frontends() {
 setup_database() {
     header "PostgreSQL Database"
 
+    # Ensure PostgreSQL binaries are on PATH (keg-only package)
+    local pg_prefix
+    pg_prefix="$(brew --prefix postgresql@17 2>/dev/null)"
+    if [[ -d "${pg_prefix}/bin" ]]; then
+        export PATH="${pg_prefix}/bin:$PATH"
+    fi
+
+    local pg_data
+    pg_data="$(brew --prefix)/var/postgresql@17"
+
     # Ensure PostgreSQL is started (may not have come up during deps phase)
     if ! pg_isready -q 2>/dev/null; then
         info "PostgreSQL not ready — attempting to start..."
@@ -264,22 +283,19 @@ setup_database() {
 
     if ! pg_isready -q 2>/dev/null; then
         err "PostgreSQL is not responding after 30 seconds"
-        info "Trying manual start..."
-        local pg_prefix
-        pg_prefix="$(brew --prefix postgresql@17 2>/dev/null)"
-        local pg_data="${HOMEBREW_PREFIX:-/opt/homebrew}/var/postgresql@17"
+        info "Trying manual start with pg_ctl..."
 
         # Try starting directly (bypasses launchd issues on fresh installs)
-        "${pg_prefix}/bin/pg_ctl" -D "$pg_data" -l "$pg_data/server.log" start 2>&1 | tee -a "$LOG_FILE" || true
-        sleep 3
+        pg_ctl -D "$pg_data" -l "$pg_data/server.log" start 2>&1 | tee -a "$LOG_FILE" || true
+        sleep 5
 
         if ! pg_isready -q 2>/dev/null; then
             echo ""
             err "PostgreSQL still not responding. Debug with:"
-            echo "    pg_isready"
+            echo "    ${pg_prefix}/bin/pg_isready"
             echo "    brew services list"
             echo "    cat ${pg_data}/server.log"
-            die "PostgreSQL is not responding"
+            die "PostgreSQL could not be started"
         fi
     fi
 
@@ -619,6 +635,21 @@ print_summary() {
     echo "    brew services restart redis"
     echo "    brew services restart ollama"
     echo ""
+
+    # Add PostgreSQL to shell profile if not already there (keg-only package)
+    local pg_prefix
+    pg_prefix="$(brew --prefix postgresql@17 2>/dev/null)"
+    local shell_rc="$HOME/.zshrc"
+    [[ "$SHELL" == *bash* ]] && shell_rc="$HOME/.bash_profile"
+
+    if [[ -d "${pg_prefix}/bin" ]] && ! grep -q "postgresql@17/bin" "$shell_rc" 2>/dev/null; then
+        echo "" >> "$shell_rc"
+        echo "# PostgreSQL 17 (Nexus)" >> "$shell_rc"
+        echo "export PATH=\"${pg_prefix}/bin:\$PATH\"" >> "$shell_rc"
+        echo -e "  ${BOLD}Note:${NC} Added PostgreSQL to $shell_rc"
+        echo "  Run 'source $shell_rc' or open a new terminal for psql/pg_isready."
+        echo ""
+    fi
 }
 
 # ============================================================================
