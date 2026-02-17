@@ -15,6 +15,12 @@ BOLD='\033[1m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
+# Ensure PostgreSQL binaries are on PATH (keg-only package)
+pg_prefix="$(brew --prefix postgresql@17 2>/dev/null || true)"
+if [[ -n "$pg_prefix" ]] && [[ -d "${pg_prefix}/bin" ]]; then
+    export PATH="${pg_prefix}/bin:$PATH"
+fi
+
 echo ""
 echo -e "${BOLD}${CYAN}Nexus Agent — Uninstaller${NC}"
 echo -e "${BOLD}════════════════════════════${NC}"
@@ -79,16 +85,16 @@ fi
 # --- Drop PostgreSQL database ---
 echo ""
 echo -e "${BOLD}Remove PostgreSQL database?${NC}"
-if psql -lqt 2>/dev/null | cut -d '|' -f 1 | grep -qw nexus; then
+if command -v psql &>/dev/null && psql -U "$(whoami)" -lqt 2>/dev/null | cut -d '|' -f 1 | grep -qw nexus; then
     read -rp "  Drop database 'nexus'? This deletes all conversation data. [y/N] " confirm_db
     if [[ "$confirm_db" =~ ^[Yy] ]]; then
-        dropdb nexus 2>/dev/null || true
+        dropdb -U "$(whoami)" nexus 2>/dev/null || true
         echo -e "  ${GREEN}✓${NC} Database dropped"
     else
         echo -e "  ${YELLOW}!${NC} Database preserved"
     fi
 else
-    echo -e "  ${YELLOW}!${NC} Database not found"
+    echo -e "  ${YELLOW}!${NC} Database not found (or psql not on PATH)"
 fi
 
 # --- Optional: remove system dependencies ---

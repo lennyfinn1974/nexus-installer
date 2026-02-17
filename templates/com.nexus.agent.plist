@@ -11,7 +11,8 @@
         <string>__NEXUS_HOME__/venv/bin/python</string>
         <string>-m</string>
         <string>uvicorn</string>
-        <string>main:app</string>
+        <string>app:create_app</string>
+        <string>--factory</string>
         <string>--host</string>
         <string>0.0.0.0</string>
         <string>--port</string>
@@ -24,7 +25,7 @@
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
-        <string>__NEXUS_HOME__/venv/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <string>__NEXUS_HOME__/venv/bin:/opt/homebrew/opt/postgresql@17/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
         <key>VIRTUAL_ENV</key>
         <string>__NEXUS_HOME__/venv</string>
         <key>PYTHONPATH</key>
