@@ -6,9 +6,9 @@ set -euo pipefail
 # Single-pass installation of the complete Nexus AI Agent system
 # ============================================================================
 
-NEXUS_REPO="https://github.com/lennyfinn1974/nexus2.0.git"
+NEXUS_REPO="https://github.com/lennyfinn1974/plaitfrm.git"
 NEXUS_BRANCH="main"
-NEXUS_HOME="${NEXUS_HOME:-$HOME/Nexus}"
+NEXUS_HOME="${NEXUS_HOME:-$HOME/plaitfrm}"
 INSTALLER_DIR="$(cd "$(dirname "$0")" && pwd)"
 LOG_FILE="/tmp/nexus-install-$(date +%Y%m%d-%H%M%S).log"
 

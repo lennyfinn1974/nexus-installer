@@ -1,6 +1,9 @@
-# Nexus Agent — macOS Installer
+# plaitfrm — macOS Installer
 
-Single-command installer for the complete Nexus AI Agent system on macOS.
+Single-command installer for the complete **plaitfrm** AI Agent system on macOS.
+
+> ℹ️ This installer now deploys **plaitfrm** (formerly Nexus 2.0). plaitfrm is the canonical product with production-grade installer, tier architecture (edge/pro/core), and SMB vertical plugins.
+
 
 ## What Gets Installed
 
@@ -8,9 +11,9 @@ Single-command installer for the complete Nexus AI Agent system on macOS.
 - **Ollama** + AI models (kimi-k2.5, nomic-embed-text)
 - **PostgreSQL 17** — conversation storage, knowledge graph
 - **Redis** — caching, clustering coordination
-- **Nexus Backend** — FastAPI server with 8 plugins, 38 skill actions
-- **Nexus Chat UI** — React 19 + Vite web interface
-- **Nexus Admin UI** — System management dashboard
+- **plaitfrm Backend** — FastAPI server with 8 plugins, 38 skill actions
+- **plaitfrm Chat UI** — React 19 + Vite web interface
+- **plaitfrm Admin UI** — System management dashboard
 - **RAG Pipeline** — embeddings, knowledge graph, vector search
 - **Auto-start daemon** — launches on login, restarts on crash
 
@@ -39,7 +42,7 @@ The installer will prompt you for optional API keys during setup. Press Enter to
 NEXUS_HOME=/path/to/nexus ./install.sh
 ```
 
-Default: `~/Nexus`
+Default: `~/plaitfrm`
 
 ## After Installation
 
